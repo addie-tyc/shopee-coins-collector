@@ -1,12 +1,15 @@
 
 /* eslint-disable promise/param-names */
 /* eslint-disable no-tabs */
-import { errors, LaunchOptions, Page } from 'puppeteer'
+import * as fs from 'fs'
+import { errors, LaunchOptions, Page, Protocol } from 'puppeteer'
 import { logger } from '../logger'
 import { BaseCrawler, ICrawlerOptions } from './BaseCrawler'
 import * as txt from '../loginResultTxt'
 import * as exitCode from '../exitCode'
-import { login, pwd } from '../config'
+import { ShopeeCredential } from '../types'
+import { login, pwd, aesKey } from '../config'
+import { AES, enc } from 'crypto-ts'
 
 export class ShopeeCrawler extends BaseCrawler {
   readonly homepage = 'https://shopee.tw/'
@@ -18,10 +21,13 @@ export class ShopeeCrawler extends BaseCrawler {
 
   constructor (
 		readonly launchOptions: LaunchOptions,
-		options: ICrawlerOptions = {}) {
+		options: ICrawlerOptions = {},
+		cookie?: Protocol.Network.Cookie | any) {
     super(launchOptions, options)
     this.login = <string>login
     this.pwd = <string>pwd
+    this.aesKey = <string>aesKey
+    this.pathCookie = cookie
   }
 
   async run () {
@@ -30,6 +36,12 @@ export class ShopeeCrawler extends BaseCrawler {
       throw new Error('Config is not completed. Please check your env or config file.')
     }
     const page = await this.newPage(this.homepage)
+    if (this.pathCookie !== undefined) {
+      await this.loadCookies(page)
+    } else {
+      logger.info('No cookies given. Will try to login using username and password.')
+    }
+
     let result: number | undefined = await this.tryLogin(page)
     logger.debug(`login result: ${result}`)
     if (result === exitCode.NEED_SMS_AUTH) {
@@ -43,9 +55,65 @@ export class ShopeeCrawler extends BaseCrawler {
 
     // Now we are logged in.
 
+    // Save cookies.
+    if (this.pathCookie !== undefined) {
+      await this.saveCookies(page)
+    }
+
     await this.tryReceiveCoin(page)
     await this.closeBrowser()
     return result
+  }
+
+  async saveCookies (page: Page): Promise<void> {
+    logger.info('Start to save cookie.')
+    try {
+      const cookies = await page.cookies()
+      const credential: ShopeeCredential = {
+        login: this.login,
+        pwd: this.pwd,
+        cookies
+      }
+
+      fs.writeFileSync(this.pathCookie!, AES.encrypt(JSON.stringify(credential), this.aesKey).toString())
+      logger.info('Cookie saved.')
+    } catch (e: unknown) {
+      // Suppress error.
+      if (e instanceof Error) {
+        logger.warn('Failed to save cookie: ' + e.message)
+      } else {
+        logger.warn('Failed to save cookie.')
+      }
+    }
+  }
+
+  async loadCookies (page: Page): Promise<void> {
+    logger.info('Start to load cookies.')
+
+    // Connect to dummy page.
+    await page.goto(this.homepage)
+
+    // Try to load cookies.
+    try {
+      const cookiesStr = fs.readFileSync(this.pathCookie!, 'utf-8')
+      const curCookie: ShopeeCredential = JSON.parse(AES.decrypt(cookiesStr, this.aesKey).toString(enc.Utf8))
+
+      // If username or password is not explicitly set, loads if from
+      // credential.
+      this.login ||= <string>curCookie.login
+      this.pwd ||= <string>curCookie.pwd
+      const cookies = curCookie.cookies
+      await page.setCookie(...cookies)
+      logger.info('Cookies loaded.')
+    } catch (e: unknown) {
+      // Cannot load cookies; ignore. This may be due to invalid cookie string
+      // pattern.
+      if (e instanceof Error) {
+        logger.error('Failed to load cookies: ' + e.message)
+      } else {
+        logger.error('Failed to load cookies.')
+      }
+    }
   }
 
   async tryLogin (page: Page) {
@@ -222,6 +290,11 @@ export class ShopeeCrawler extends BaseCrawler {
   async checkConf () {
     if (!this.login || !this.pwd) {
       logger.error('Miss `SHOPEE_LOGIN` or `SHOPEE_PWD`')
+      return exitCode.WRONG_CONF
+    }
+
+    if (!this.aesKey) {
+      logger.error('Miss `AES_KEY`')
       return exitCode.WRONG_CONF
     }
   }
