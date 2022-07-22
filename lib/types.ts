@@ -1,7 +1,7 @@
-import { Protocol } from 'puppeteer'
+import { Cookie } from 'puppeteer'
 
 export interface ShopeeCredential {
     login: string | undefined;
     pwd: string | undefined;
-    cookies: Protocol.Network.Cookie[];
+    cookies: Cookie[];
   }

@@ -2,7 +2,7 @@
 /* eslint-disable promise/param-names */
 /* eslint-disable no-tabs */
 import * as fs from 'fs'
-import { errors, LaunchOptions, Page, Protocol } from 'puppeteer'
+import { errors, LaunchOptions, Page, Cookie } from 'puppeteer'
 import { logger } from '../logger'
 import { BaseCrawler, ICrawlerOptions } from './BaseCrawler'
 import * as txt from '../loginResultTxt'
@@ -22,7 +22,7 @@ export class ShopeeCrawler extends BaseCrawler {
   constructor (
 		readonly launchOptions: LaunchOptions,
 		options: ICrawlerOptions = {},
-		cookie?: Protocol.Network.Cookie | any) {
+		cookie?: Cookie | any) {
     super(launchOptions, options)
     this.login = <string>login
     this.pwd = <string>pwd
