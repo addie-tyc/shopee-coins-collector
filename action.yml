@@ -1,0 +1,7 @@
+name: 'Shopee Coin Collector'
+author: 'Addie Chung'
+description: 'Automatically Collect Shopee Coin with TypeScript'
+
+runs:
+  using: 'node16'
+  main: 'collect.js'

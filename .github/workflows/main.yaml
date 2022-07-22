@@ -1,0 +1,43 @@
+name: Shopee Coin Collector
+on: 
+  workflow_dispatch:
+    inputs:
+      logLevel:
+        description: 'Log level'     
+        required: true
+        default: 'info'
+  schedule:
+    - cron: "10 16 * * *" 
+jobs:
+  run-action:
+    name: Run action
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2 
+      - name: Use Node.js 16.x
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16.x
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: TypeScript compile
+        run: tsc *.ts --lib dom,es2021
+
+      - name: Cache Cookie
+        id: cache-cookie
+        uses: actions/cache@v3
+        with:
+          path: env.cookie
+          key: env.cookie
+        
+      - name: Run Shopee Collector
+        run: node collect.js
+        env:
+          SHOPEE_LOGIN: ${{ secrets.SHOPEE_LOGIN }}
+          SHOPEE_PWD: ${{ secrets.SHOPEE_PWD }}
+          AES_KEY: ${{ secrets.AES_KEY }}
