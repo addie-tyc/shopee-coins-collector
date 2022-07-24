@@ -266,7 +266,7 @@ export class ShopeeCrawler extends BaseCrawler {
       status = await Promise.any([receivable, received])
       logger.debug(`coin status: ${status}`)
     } catch (e) {
-      if (e instanceof AggregateError && e instanceof errors.TimeoutError) {
+      if (e instanceof AggregateError) {
         logger.error('Timeout. Try again and be fast somehow.')
         throw e
       }
