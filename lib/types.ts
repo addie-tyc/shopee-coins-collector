@@ -1,4 +1,4 @@
-import { Cookie } from 'puppeteer'
+import { Cookie } from 'puppeteer';
 
 export interface ShopeeCredential {
     login: string | undefined;

@@ -1,4 +1,4 @@
-import * as winston from 'winston'
+import * as winston from 'winston';
 
 export const logger = winston.createLogger({
   level: 'debug',
@@ -14,4 +14,4 @@ export const logger = winston.createLogger({
       )
     })
   ]
-})
+});

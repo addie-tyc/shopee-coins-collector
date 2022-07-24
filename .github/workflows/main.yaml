@@ -1,11 +1,6 @@
 name: Shopee Coin Collector
 on: 
-  workflow_dispatch:
-    inputs:
-      logLevel:
-        description: 'Log level'     
-        required: true
-        default: 'info'
+  workflow_dispatch: ~
   schedule:
     - cron: "10 16 * * *" 
 jobs:
@@ -28,16 +23,16 @@ jobs:
       - name: TypeScript compile
         run: tsc *.ts --lib dom,es2021
 
-      - name: Cache Cookie
+      - name: Cache cookie
         id: cache-cookie
         uses: actions/cache@v3
         with:
           path: env.cookie
           key: env.cookie
         
-      - name: Run Shopee Collector
+      - name: Run shopee collector
         run: node collect.js
         env:
-          SHOPEE_LOGIN: ${{ secrets.SHOPEE_LOGIN }}
+          SHOPEE_USR: ${{ secrets.SHOPEE_USR }}
           SHOPEE_PWD: ${{ secrets.SHOPEE_PWD }}
           AES_KEY: ${{ secrets.AES_KEY }}
