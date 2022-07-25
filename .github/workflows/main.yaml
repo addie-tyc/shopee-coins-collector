@@ -28,7 +28,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: env.cookie
-          key: env.cookie
+          key: cookie-${{ hashFiles('env.cookie') }}
         
       - name: Run shopee collector
         run: node collect.js
