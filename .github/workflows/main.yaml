@@ -23,12 +23,21 @@ jobs:
       - name: TypeScript compile
         run: tsc *.ts --lib dom,es2021
 
+      - name: Hash usr name
+        uses: pplanel/hash-calculator-action@v1.3.1
+        id: hash_usr
+        with:
+          input: ${{ secrets.SHOPEE_USR }}
+          method: SHA3
+          output_len: 384
+          truncate: true
+
       - name: Cache cookie
         id: cache-cookie
         uses: actions/cache@v3
         with:
           path: env.cookie
-          key: env.cookie
+          key: cookie-${{ steps.hash_usr.outputs.digest }}
         
       - name: Run shopee collector
         run: node collect.js
