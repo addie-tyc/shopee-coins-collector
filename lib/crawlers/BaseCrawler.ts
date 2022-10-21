@@ -1,5 +1,5 @@
 import * as puppeteer from 'puppeteer';
-import { Browser, LaunchOptions, Page } from 'puppeteer';
+import { Browser, PuppeteerLaunchOptions, Page } from 'puppeteer';
 import { logger } from '../logger';
 import { wait } from '../util';
 
@@ -23,7 +23,7 @@ export abstract class BaseCrawler {
   protected options: ICrawlerFullOptions;
 
   constructor (
-  readonly launchOptions:LaunchOptions,
+  readonly launchOptions: PuppeteerLaunchOptions,
   options: ICrawlerOptions = {}
   ) {
     this.options = Object.assign({}, DefaultCrawlerOptions, options);
@@ -36,7 +36,7 @@ export abstract class BaseCrawler {
     }
   }
 
-  isHeadless (launchOptions: LaunchOptions): boolean {
+  isHeadless (launchOptions: PuppeteerLaunchOptions): boolean {
     if (launchOptions.devtools) {
       return false;
     }
@@ -49,7 +49,7 @@ export abstract class BaseCrawler {
 
   private _browser: Browser|null = null;
 
-  async getBrowser (launchOptions:LaunchOptions = {}): Promise<Browser> {
+  async getBrowser (launchOptions: PuppeteerLaunchOptions = {}): Promise<Browser> {
     if (this._browser === null) {
       const browser = await puppeteer.launch(launchOptions);
 
