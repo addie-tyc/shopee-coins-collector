@@ -148,7 +148,7 @@ export class ShopeeCrawler extends BaseCrawler {
     ];
     const result = await Promise.any(outcomes);
     const text = await page.evaluate(el => (el as HTMLElement).innerText, result);
-    logger.info(text);
+    logger.debug(text);
 
     if (text === txt.REWARD) {
       // login succeeded
