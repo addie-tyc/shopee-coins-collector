@@ -1,5 +1,5 @@
 import * as puppeteer from 'puppeteer';
-import { Browser, PuppeteerLaunchOptions, Page } from 'puppeteer';
+import { Browser, PuppeteerLaunchOptions, Page, ElementHandle } from 'puppeteer';
 import { logger } from '../logger';
 import { wait } from '../util';
 
@@ -136,7 +136,7 @@ export abstract class BaseCrawler {
 
     for (let i = 0; i < 4; i++) {
       try {
-        await btn.click();
+        await (btn as ElementHandle<Element>).click();
         if (navigate) { await page.waitForNavigation({ waitUntil: 'load' }) }
         break;
       } catch (err) {

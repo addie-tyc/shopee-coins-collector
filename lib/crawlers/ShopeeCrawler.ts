@@ -147,7 +147,7 @@ export class ShopeeCrawler extends BaseCrawler {
       page.waitForXPath(`//div[contains(text(), "${txt.EMAIL_AUTH}")]`)
     ];
     const result = await Promise.any(outcomes);
-    const text = await page.evaluate(el => el.innerText, result);
+    const text = await page.evaluate(el => (el as HTMLElement).innerText, result);
     logger.info(text);
 
     if (text === txt.REWARD) {
