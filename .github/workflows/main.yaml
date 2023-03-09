@@ -36,8 +36,10 @@ jobs:
         id: cache-cookie
         uses: actions/cache@v3
         with:
+          key: cookie-${{ steps.hash_usr.outputs.digest }}-${{github.run_id}}
+          restore-keys: |
+            cookie-${{ steps.hash_usr.outputs.digest }}
           path: env.cookie
-          key: cookie-${{ steps.hash_usr.outputs.digest }}
         
       - name: Run shopee collector
         run: node collect.js
