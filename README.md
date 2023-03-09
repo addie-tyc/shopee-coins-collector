@@ -17,10 +17,8 @@ Therefore, it can lower the users' entry barrier and speed up.
 
 ## Update (2023/03/09)
 
-The workflow would update the cache every time.  
-The machanism behind is to use a key which is unique for every run (suffixing by `github.run_id`) and use restore-keys to restore the nearest cache.  
-If there is already an old cache named `cache-{hash}` (without run_id suffix), it would always be used because of the exact match.  
-Therefore, you need to delete it first to activate this feature.  
+The workflow will update the cache every time it runs. This is achieved by using a unique key for each run (by adding the github.run_id suffix to the key) and using restore-keys to restore the nearest cache. If there is already a cache named `cache-{hash}` (without run_id suffix), it would always be used because of the exact match.  
+To enable this feature, you need to first delete the cache `cache-{hash}` so that the workflow will use the nearest cache in the next run.
 [reference](https://github.com/actions/cache/blob/main/tips-and-workarounds.md#update-a-cache)
 
 ## Reference
