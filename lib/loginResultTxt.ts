@@ -12,5 +12,5 @@ export const FAILURE = '很抱歉，您的身份驗證已遭到拒絕。';
 export const ON_CELLPHONE = '請在您的手機上回覆';
 export const TOO_MUCH_TRY = '您已達到今日驗證次數上限。';
 
-export const RECEIVE_COIN = '今日簽到獲得';
-export const COIN_RECEIVED = '明天再回來領取';
+export const RECEIVE_COIN = '完成簽到';
+export const COIN_RECEIVED = '明天再回來';
