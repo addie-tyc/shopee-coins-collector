@@ -1,0 +1,49 @@
+name: Shopee Coin Collector Self-Hosted
+on: 
+  workflow_dispatch: ~
+  schedule:
+    - cron: "10 16 * * *" 
+jobs:
+  run-action:
+    name: Run action
+    runs-on: self-hosted
+
+    steps:
+      - uses: actions/checkout@v2 
+      - name: Use Node.js 16.x
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16.x
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: TypeScript compile
+        run: tsc *.ts --lib dom,es2021 --skipLibCheck
+
+      - name: Hash usr name
+        uses: pplanel/hash-calculator-action@v1.3.1
+        id: hash_usr
+        with:
+          input: ${{ secrets.SHOPEE_USR }}
+          method: SHA3
+          output_len: 384
+          truncate: true
+
+      - name: Cache cookie
+        id: cache-cookie
+        uses: actions/cache@v3
+        with:
+          key: cookie-${{ steps.hash_usr.outputs.digest }}-${{github.run_id}}
+          restore-keys: |
+            cookie-${{ steps.hash_usr.outputs.digest }}
+          path: env.cookie
+        
+      - name: Run shopee collector
+        run: node collect.js
+        env:
+          SHOPEE_USR: ${{ secrets.SHOPEE_USR }}
+          SHOPEE_PWD: ${{ secrets.SHOPEE_PWD }}
+          AES_KEY: ${{ secrets.AES_KEY }}
