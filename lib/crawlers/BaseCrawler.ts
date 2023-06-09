@@ -4,13 +4,14 @@ import { logger } from '../logger';
 import { wait } from '../util';
 
 export interface ICrawlerOptions {
-parallelism?: number
-cacheExpirySeconds?: number
+  parallelism?: number
+  cacheExpirySeconds?: number
+  args?: String[]
 }
 
 interface ICrawlerFullOptions extends ICrawlerOptions {
-parallelism: number
-cacheExpirySeconds: number
+  parallelism: number
+  cacheExpirySeconds: number
 }
 
 export const DefaultCrawlerOptions: ICrawlerFullOptions = {
@@ -71,7 +72,20 @@ export abstract class BaseCrawler {
 
   async newPage (url: string|undefined): Promise<Page> {
     const browser = await this.getBrowser(this.launchOptions);
+    browser.on('targetcreated', async (target) => {
+      if (target.type() === 'page') {
+        const page = await target.page();
+        await page.evaluateOnNewDocument(() => {
+          // solution from https://github.com/wdzeng/shopee-coins-bot/issues/53 not working
+          Object.defineProperty(navigator, 'webdriver', {
+            get: () => undefined
+          });
 
+          // another the workaround from https://stackoverflow.com/questions/56335066/changing-window-navigator-within-puppeteer-to-bypass-antibot-system
+          // delete navigator.__proto__.webdriver;
+        });
+      }
+    });
     const page = await browser.newPage();
     if (url) {
       await page.goto(url);
